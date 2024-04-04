@@ -11,17 +11,9 @@ session.headers['authorization'] = 'SSWS ' + token
 response = session.get(org_url + '/api/v1/users/me')
 me = response.json()
 if response.ok:
-    print(me['profile']['title'])
+    print(me['profile']['login'])
 else:
     print('error', me)
-
-response = session.get(org_url + '/api/v1/users/me')
-me = response.json()
-if response.ok:
-    print(me['profile']['title'])
-else:
-    print('error', me)
-
 
 # Paginate
 url = org_url + '/api/v1/users?limit=2&filter=profile.lastName eq "Doe"'
