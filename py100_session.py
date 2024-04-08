@@ -8,6 +8,7 @@ token = os.getenv('OKTA_CLIENT_TOKEN')
 session = requests.Session()
 session.headers['authorization'] = 'SSWS ' + token
 
+
 response = session.get(org_url + '/api/v1/users/me')
 me = response.json()
 if response.ok:
