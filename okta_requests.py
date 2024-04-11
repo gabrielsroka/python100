@@ -1,4 +1,6 @@
+import time
 import requests
+import datetime
 import os
 
 # If you're making multiple API calls, using Session is much faster.
@@ -11,7 +13,20 @@ class Session(requests.Session):
     def request(self, method, url, **kwargs):
         if not url.startswith('https:'):
             url = self.org_url + url
-        return super().request(method, url, **kwargs)
+        response = super().request(method, url, **kwargs)
+
+        limit = int(response.headers['X-Rate-Limit-Limit'])
+        remaining = int(response.headers['X-Rate-Limit-Remaining'])
+        # see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromtimestamp
+        reset = datetime.datetime.utcfromtimestamp(int(response.headers['X-Rate-Limit-Reset']))
+        print(limit, remaining, reset)
+        if remaining < 10:
+            print('sleeping...')
+            while reset > now:
+                time.sleep(1) # TODO: calculate sleep time
+                now = datetime.utcnow()
+
+        return response
 
     def post(self, url, json=None):
         return super().post(url, json=json)
@@ -24,8 +39,8 @@ class Session(requests.Session):
 
     def get_objects(self, url, **params):
         while url:
-            res = self.get(url, params=params)
+            response = self.get(url, params=params)
             params = None
-            for o in res.json():
+            for o in response.json():
                 yield o
-            url = res.links.get('next', {}).get('url')
+            url = response.links.get('next', {}).get('url')
