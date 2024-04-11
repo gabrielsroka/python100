@@ -17,14 +17,14 @@ class Session(requests.Session):
 
         limit = int(response.headers['X-Rate-Limit-Limit'])
         remaining = int(response.headers['X-Rate-Limit-Remaining'])
-        # see https://docs.python.org/3/library/datetime.html#datetime.datetime.fromtimestamp
-        reset = datetime.datetime.utcfromtimestamp(int(response.headers['X-Rate-Limit-Reset']))
+        reset = datetime.datetime.fromtimestamp(int(response.headers['X-Rate-Limit-Reset']), datetime.UTC)
+        now = datetime.datetime.now(datetime.UTC)
         print(limit, remaining, reset)
         if remaining < 10:
             print('sleeping...')
             while reset > now:
                 time.sleep(1) # TODO: calculate sleep time
-                now = datetime.utcnow()
+                now = datetime.datetime.now(datetime.UTC)
 
         return response
 
